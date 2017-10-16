@@ -1,5 +1,5 @@
 import { combineReducers } from "redux";
-import uuid from 'uuid';
+import * as _ from 'lodash';
 
 const deckInitialState = {
     remainingCards: [
@@ -33,50 +33,23 @@ export const deck = (state = deckInitialState, action) => {
     switch (action.type) {
         case 'DECK_SHUFFLE':
             return Object.assign({}, state,  { remainingCards: shuffle(state.remainingCards) });
-        default:
-          return state
-    }
-}
-
-export const player = (state= playerInitialState, action) => {
-    switch (action.type) {
-        case 'ADD_PLAYER':
-            const player = {
-                id: uuid(),
-                name: action.name
-            }
-            return Object.assign({}, state, { [player.id]:player });
         case 'DEAL_ONE_CARD':
-            if(!action.userId || !state.player[action.userId]){
-                return state;
-            }else{
-                let partialState = {
-                    remainingCards: [],
-                    leftCards: []
-                };
-                let card = state.remainingCards.first();
-                card.handler= action.userId;
-                partialState.leftCards.push(card);
-                partialState.remainingCards = state.remainingCards.slice(1);
-                return Object.assign({}, state, partialState);
+            const { cardId, userName } = action;
+            let card = _.find(state.remainingCards, {id: cardId});
+            card.handler = userName;
+            let newState = {
+                remainingCards: _.without(state.remainingCards, card),
+                leftCards: state.leftCards.concat(card)
             }
+            return newState;
         default:
           return state
     }
 }
-
-export const dealOneCard = (cards, player) => {
-    let card = cards.filter(c => c.handler).first(); // get the first non handled card
-    if(!card){
-        throw new Exception('Could not get more card');
-    }else{
-
-    }
-};
 
 // Fisher–Yates Shuffle
 export const shuffle = (cards)=>{
-    let deck = cards.splice(0);
+    let deck = cards.slice(0);
     let currentIndex = deck.length, temporaryValue, randomIndex;
   
     // While there remain elements to shuffle...
@@ -93,6 +66,38 @@ export const shuffle = (cards)=>{
 
     return deck;
 }
+
+export const player = (state= playerInitialState, action) => {
+    switch (action.type) {
+        case 'ADD_PLAYER':
+            if(!action.userName)
+                throw new Error('You need to specify a name to add a player');
+            if(state[action.userName])
+                throw new Error(`A user named ${action.userName} is already playing`);
+            
+            const player = { // TODO: Create ES6 Class or TypeScript type
+                name: action.userName,
+                cardsIds: []
+            };
+            return Object.assign({}, state, { [player.name]:player });
+        case 'DEAL_ONE_CARD':
+            if(!action.userName || !state[action.userName] || !action.cardId){
+                return state;
+            }else{
+                const { cardId, userName } = action;                
+                const user = state[userName];
+                const userCardsIds = user.cardsIds.slice(0);
+                userCardsIds.push(cardId);
+                return Object.assign({}, state, { [userName]: { cardsIds : userCardsIds } });
+            }
+        default:
+          return state
+    }
+}
+
+
+
+
 
 export const rootReducer = combineReducers({
     deck,
