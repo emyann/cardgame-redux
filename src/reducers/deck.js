@@ -1,29 +1,9 @@
 import * as _ from 'lodash';
+import { Deck } from "./../models/deck";
 
 const initialState = {
-    remainingCards: [
-        {
-          id: "1.SPADE",
-          value: "1",
-          suit: "SPADE"
-        },
-        {
-          id: "7.HEART",
-          value: "7",
-          suit: "HEART"
-        },
-        {
-          id: "6.DIAMOND",
-          value: "6",
-          suit: "DIAMOND"
-        },
-        {
-          id: "K.CLUB",
-          value: "K",
-          suit: "DIAMOND"
-        }
-      ],
-      leftCards: []
+    remainingCards: Deck.createDeck(),
+    leftCards: []
 };
 
 export const deck = (state = initialState, action) => { 
@@ -32,6 +12,9 @@ export const deck = (state = initialState, action) => {
             return Object.assign({}, state,  { remainingCards: shuffle(state.remainingCards) });
         case 'DEAL_ONE_CARD':
             const { cardId, userName } = action;
+            if(!cardId || !userName){
+                return state;
+            }
             let card = _.find(state.remainingCards, {id: cardId});
             card.handler = userName;
             let newState = {

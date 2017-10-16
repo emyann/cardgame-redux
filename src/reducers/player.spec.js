@@ -1,12 +1,7 @@
 import deepFreeze from "deep-freeze";
-import configureMockStore from 'redux-mock-store';
-import thunk from 'redux-thunk'
-import { player, playerErrors } from "./player";
+import { playerErrors } from "./../errors";
+import { player } from "./player";
 import { addPlayer, dealOneCard } from "../actions";
-console.log('configureMockStore', configureMockStore);
-const middlewares = [thunk];
-const mockStore = configureMockStore(middlewares);
-
 
 describe('Cardgame - Redux', () => {
     describe('Reducers', () => {
@@ -31,8 +26,8 @@ describe('Cardgame - Redux', () => {
                 expect(player(stateBefore, action)).toEqual(stateAfter);
             });
 
-            it('should handle DEAL_ONE_CARD action', () => {             
-                const store = mockStore({
+            it('should handle DEAL_ONE_CARD action', () => {            
+                const store = {
                     deck:{
                         remainingCards:[
                             {
@@ -54,11 +49,10 @@ describe('Cardgame - Redux', () => {
                             cardsIds: []
                         }
                     }
-                });
+                };
                 let userName = 'user-name-id';
-                let card = store.getState().deck.remainingCards[0];
+                let card = store.deck.remainingCards[0];
                 expect(typeof dealOneCard(userName)).toEqual('function');
-                const getState = () => (stateBefore);                
                 const stateAfter = {
                     player:{
                         'user-name-id': {
@@ -67,13 +61,13 @@ describe('Cardgame - Redux', () => {
                         }
                     }
                 };
-                const expectedActions = [{type: 'DEAL_ONE_CARD', userName, cardId: card.id }];
-                store.dispatch(dealOneCard(userName));
-                console.log('debug', JSON.stringify(store.getState(),null,4));
-                expect(store.getActions()).toEqual(expectedActions);
-                // expect(store.getState().player).toEqual(stateAfter.player);
-                
+                let getState = () => store;
+                let dispatch = jasmine.createSpy('dispatch');
+                dealOneCard(userName)(dispatch, getState);
+                expect(dispatch).toHaveBeenCalledWith({ type: 'DEAL_ONE_CARD', userName, cardId: card.id});    
+                expect(player(store.player, { type: 'DEAL_ONE_CARD', userName, cardId: card.id}) ).toEqual(stateAfter.player);   
             });
+
 
             it('should throw if player is added without a name', () => {
                 const stateBefore = {};

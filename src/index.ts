@@ -7,7 +7,7 @@ import * as _ from 'lodash';
 const middleware = [thunk];
 const store = createStore(rootReducer, applyMiddleware(...middleware));
 store.subscribe(() => {
-    console.log('debug:: state', JSON.stringify(store.getState(), null, 4));
+    console.log('debug:: state', JSON.stringify(store.getState().player, null, 4));
 });
 store.dispatch(addPlayer('yrnd1'));
 store.dispatch(addPlayer('player2'));
