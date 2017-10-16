@@ -15,7 +15,7 @@ export const deck = (state = initialState, action) => {
             if(!cardId || !userName){
                 return state;
             }
-            let card = _.find(state.remainingCards, {id: cardId});
+            let card = _.find(state.remainingCards, {id: cardId}); //TODO: Maybe Refactor the deck state tree to a flat schema to help O(1) access. shuffle will pay the conversion
             card.handler = userName;
             let newState = {
                 remainingCards: _.without(state.remainingCards, card),
