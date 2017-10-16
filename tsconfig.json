@@ -10,7 +10,8 @@
       "dom"
     ],
     "noImplicitAny": true,
-    "suppressImplicitAnyIndexErrors": true
+    "suppressImplicitAnyIndexErrors": true,
+    "allowJs": true
   },
   "exclude": [
     "node_modules",
