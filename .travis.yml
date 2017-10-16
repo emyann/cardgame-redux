@@ -1,0 +1,11 @@
+branches:
+  only:
+  - master
+
+language: node_js
+node_js:
+  - v6
+  - v5
+  - v4
+
+script: npm test
